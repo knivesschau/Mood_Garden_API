@@ -8,6 +8,7 @@
     "predeploy": "npm audit",
     "deploy": "git push heroku master",
     "dev": "nodemon src/server.js",
+    "migrate": "postgrator --config postgrator-config.js",
     "test": "mocha --require test/setup.js"
   },
   "keywords": [],
