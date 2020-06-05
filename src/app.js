@@ -4,7 +4,7 @@ const morgan = require('morgan');
 const cors = require('cors');
 const helmet = require('helmet');
 const {NODE_ENV} = require('./config');
-const RosesService = require('./roses/roses-service')
+const rosesRouter = require('./roses/roses-router');
 
 const app = express();
 
@@ -20,25 +20,8 @@ app.get('/', (req, res) => {
     res.send('Hello, world!')
 });
 
-app.get('/roses', (req, res, next) => {
-    const knexInstance = req.app.get('db')
-    
-    RosesService.getAllRoses(knexInstance)
-        .then(roses => {
-            res.json(roses)
-        })
-        .catch(next)
-});
+app.use('/roses', rosesRouter);
 
-app.get('/roses/:rose_id', (req, res, next) => {
-    const knexInstance = req.app.get('db');
-
-    RosesService.getRoseById(knexInstance, req.params.rose_id)
-        .then(rose => {
-            res.json(rose)
-        })
-        .catch(next)
-});
 
 app.use(function errorHandler(error, req, res, next) {
     let response;
