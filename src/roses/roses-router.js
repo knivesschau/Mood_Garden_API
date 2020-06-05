@@ -17,6 +17,22 @@ rosesRouter
         })
         .catch(next)
     })
+    .post(jsonParser, (req, res, next) => {
+        const {rose, thorn, bud, color} = req.body;
+        const newRose = {rose, thorn, bud, color};
+
+        RosesService.insertRose(
+            req.app.get('db'),
+            newRose
+        )
+        .then(rose => {
+            res
+                .status(201)
+                .location(`/roses/${rose.id}`)
+                .json(rose)
+        })
+        .catch(next)
+    })
 
 rosesRouter
     .route('/:rose_id')

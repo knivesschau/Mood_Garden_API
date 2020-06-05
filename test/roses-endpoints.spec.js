@@ -23,7 +23,7 @@ describe('Roses Endpoints', function() {
 
     
     describe(`GET /roses`, () => {
-        context('Given there are journal entries in the database', () => {
+        context ('Given there are journal entries in the database', () => {
             const testRoses = makeRosesArray();
             
             beforeEach('insert rose entries', () => {
@@ -41,7 +41,7 @@ describe('Roses Endpoints', function() {
     })
         
     describe(`GET /roses/:rose_id`, () => {
-        context('Given there are journal entries in the database', () => {
+        context ('Given there are journal entries in the database', () => {
             const testRoses = makeRosesArray();
             
             beforeEach('insert rose entries', () => {
@@ -58,6 +58,46 @@ describe('Roses Endpoints', function() {
                 .get(`/roses/${entryId}`)
                 .expect(200, expectedEntry)
             });
-        })
-    })
+        });
+    });
+
+    describe.only(`POST /roses`, () => {
+        this.retries(3);
+        
+        const newRose = {
+            rose: 'Test rose entry',
+            thorn: 'Test thorn entry',
+            bud: 'Test bud entry',
+            color: 'Purple'
+        };
+        
+        it (`Creats a journal entry, responds 201 and with the entry created`, () => {
+            return supertest(app)
+                .post('/roses')
+                .send(newRose) 
+                .expect(201)
+                .expect(res => {
+                    expect(res.body.rose).to.eql(newRose.rose)
+                    expect(res.body.thorn).to.eql(newRose.thorn)
+                    expect(res.body.bud).to.eql(newRose.bud)
+                    expect(res.body.color).to.eql(newRose.color)
+                    expect(res.body).to.have.property('id')
+                    expect(res.headers.location).to.eql(`/roses/${res.body.id}`)
+
+                    const expected = new Date().toLocaleString();
+                    const actual = new Date(res.body.entry_date).toLocaleString();
+
+                    expect(actual).to.eql(expected)
+                })
+                .then(postRes => {
+                    supertest(app)
+                        .get(`/roses/${postRes.body.id}`)
+                        .expect(postRes.body)
+                });
+        });
+    });
+
+
+
+
 })

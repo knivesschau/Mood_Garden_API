@@ -11,6 +11,15 @@ const RosesService = {
             .where('id', id)
             .first();
     },
+    insertRose(knex, newRose) {
+        return knex
+            .insert(newRose)
+            .into('rose_entries')
+            .returning('*')
+            .then(rows => {
+                return rows[0]
+            });
+    },
 
 }
 
