@@ -18,6 +18,8 @@ describe.only('Roses Endpoints', function() {
 
     before('clean the table', () => db('rose_entries').truncate());
 
+    afterEach('cleanup', () => db('rose_entries').truncate());
+
     context('Given there are rose entries in the database', () => {
         const testRoses = [
             {
@@ -56,6 +58,15 @@ describe.only('Roses Endpoints', function() {
             return supertest(app)
                 .get('/roses')
                 .expect(200, testRoses)
+        });
+
+        it (`GET /roses/:rose_id responds with 200 and the specific entry`, () => {
+            const entryId = 2;
+            const expectedEntry = testRoses[entryId - 1];
+
+            return supertest(app)
+                .get(`/roses/${entryId}`)
+                .expect(200, expectedEntry)
         });
     })
 })

@@ -30,6 +30,16 @@ app.get('/roses', (req, res, next) => {
         .catch(next)
 });
 
+app.get('/roses/:rose_id', (req, res, next) => {
+    const knexInstance = req.app.get('db');
+
+    RosesService.getRoseById(knexInstance, req.params.rose_id)
+        .then(rose => {
+            res.json(rose)
+        })
+        .catch(next)
+});
+
 app.use(function errorHandler(error, req, res, next) {
     let response;
 
