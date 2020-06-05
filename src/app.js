@@ -22,7 +22,6 @@ app.get('/', (req, res) => {
 
 app.use('/roses', rosesRouter);
 
-
 app.use(function errorHandler(error, req, res, next) {
     let response;
 
