@@ -20,6 +20,11 @@ const RosesService = {
                 return rows[0]
             });
     },
+    deleteRose(knex, id) {
+        return knex('rose_entries')
+            .where({id})
+            .delete()
+    },
 
 }
 

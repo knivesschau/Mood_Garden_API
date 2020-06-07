@@ -6,6 +6,15 @@ const RosesService = require('./roses-service');
 const rosesRouter = express.Router();
 const jsonParser = express.json();
 
+const serializeJournalEntry = rose => ({
+    id: rose.id,
+    entry_date: rose.entry_date,
+    rose: xss(rose.rose),
+    thorn: xss(rose.thorn),
+    bud: xss(rose.bud),
+    color: xss(rose.color)
+});
+
 rosesRouter 
     .route('/')
     .get( (req,res, next) => {
@@ -21,6 +30,14 @@ rosesRouter
         const {rose, thorn, bud, color} = req.body;
         const newRose = {rose, thorn, bud, color};
 
+        for (const [key, value] of Object.entries(newRose)) {
+            if (value == null) {
+                return res.status(400).json({
+                    error: { message: `Missing '${key}' entry in request body.`}
+                })
+            }
+        }
+
         RosesService.insertRose(
             req.app.get('db'),
             newRose
@@ -32,21 +49,36 @@ rosesRouter
                 .json(rose)
         })
         .catch(next)
-    })
+    });
 
 rosesRouter
     .route('/:rose_id')
-    .get((req, res, next) => {
-        const knexInstance = req.app.get('db')
-
-        RosesService.getRoseById(knexInstance, req.params.rose_id)
+    .all((req, res, next) => {
+        RosesService.getRoseById(
+            req.app.get('db'),
+            req.params.rose_id
+        )
             .then(rose => {
                 if (!rose) {
                     return res.status(404).json({
                         error: {message: `Journal entry does not exist.`}
-                    })
+                    });
                 }
-                res.json(rose)
+                res.rose = rose;
+                next()
+            })
+            .catch(next)
+    })
+    .get((req, res, next) => {
+       res.json(serializeJournalEntry(res.rose))
+    })
+    .delete((req, res, next) => {
+        RosesService.deleteRose(
+            req.app.get('db'),
+            req.params.rose_id
+        )
+            .then(() => {
+                res.status(204).end()
             })
             .catch(next)
     })
