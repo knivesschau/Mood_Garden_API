@@ -43,7 +43,7 @@ rosesRouter
             .then(rose => {
                 if (!rose) {
                     return res.status(404).json({
-                        error: {message: `Entry does not exist.`}
+                        error: {message: `Journal entry does not exist.`}
                     })
                 }
                 res.json(rose)

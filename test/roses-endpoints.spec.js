@@ -23,6 +23,14 @@ describe('Roses Endpoints', function() {
 
     
     describe(`GET /roses`, () => {
+        context('Given no journal entries in the database', () => {
+            it (`reponds with 200 and no journal entries`, () => {
+                return supertest(app)
+                    .get('/roses')
+                    .expect(200, [])
+            });
+        });
+        
         context ('Given there are journal entries in the database', () => {
             const testRoses = makeRosesArray();
             
@@ -41,6 +49,16 @@ describe('Roses Endpoints', function() {
     })
         
     describe(`GET /roses/:rose_id`, () => {
+        context ('Given there are no journal entries in the database', () => {
+            it ('Responds with 404', () => {
+                const articleId = 2468; 
+
+                return supertest(app)
+                    .get(`/roses/${articleId}`)
+                    .expect(404, {error: {message: `Journal entry does not exist.`}})
+            });
+        });
+        
         context ('Given there are journal entries in the database', () => {
             const testRoses = makeRosesArray();
             
@@ -61,7 +79,7 @@ describe('Roses Endpoints', function() {
         });
     });
 
-    describe.only(`POST /roses`, () => {
+    describe(`POST /roses`, () => {
         this.retries(3);
         
         const newRose = {
@@ -100,4 +118,4 @@ describe('Roses Endpoints', function() {
 
 
 
-})
+});
