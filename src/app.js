@@ -17,7 +17,7 @@ app.use(helmet());
 app.use(cors());
 
 app.get('/', (req, res) => {
-    res.send('Hello, world!')
+    res.send('Welcome to the Mood Garden API!')
 });
 
 app.use('/api/roses', rosesRouter);
