@@ -45,7 +45,7 @@ rosesRouter
         .then(rose => {
             res
                 .status(201)
-                .location(`/roses/${rose.id}`)
+                .location(path.posix.join(req.originalUrl, `/${rose.id}`))
                 .json(rose)
         })
         .catch(next)
@@ -82,5 +82,29 @@ rosesRouter
             })
             .catch(next)
     })
+    .patch(jsonParser, (req, res, next) => {
+        const {rose, thorn, bud} = req.body;
+        const entryToUpdate = {rose, thorn, bud};
+
+        const numberOfValues = Object.values(entryToUpdate).filter(Boolean).length;
+
+        if (numberOfValues === 0) {
+            return res.status(400).json({
+                error: {
+                    message: `Request body must contain either 'rose', 'thorn', or 'bud'.`
+                }
+            });
+        }
+
+        RosesService.updateRose(
+            req.app.get('db'),
+            req.params.rose_id,
+            entryToUpdate
+        )
+            .then(numRowsAffected => {
+                res.status(204).end()
+            })
+            .catch(next)
+    });
 
 module.exports = rosesRouter;

@@ -22,11 +22,11 @@ describe('Roses Endpoints', function() {
     afterEach('cleanup', () => db('rose_entries').truncate());
 
     
-    describe(`GET /roses`, () => {
+    describe(`GET /api/roses`, () => {
         context('Given no journal entries in the database', () => {
             it ('Reponds with 200 and no journal entries', () => {
                 return supertest(app)
-                    .get('/roses')
+                    .get('/api/roses')
                     .expect(200, [])
             });
         });
@@ -42,19 +42,19 @@ describe('Roses Endpoints', function() {
             
             it ('GET /roses responds 200 and with all entries', () => {
                 return supertest(app)
-                .get('/roses')
+                .get('/api/roses')
                 .expect(200, testRoses)
             });
         });
     });
         
-    describe(`GET /roses/:rose_id`, () => {
+    describe(`GET /api/roses/:rose_id`, () => {
         context ('Given there are no journal entries in the database', () => {
             it ('Responds with 404', () => {
                 const articleId = 2468; 
 
                 return supertest(app)
-                    .get(`/roses/${articleId}`)
+                    .get(`/api/roses/${articleId}`)
                     .expect(404, {error: {message: `Journal entry does not exist.`}})
             });
         });
@@ -73,7 +73,7 @@ describe('Roses Endpoints', function() {
                 const expectedEntry = testRoses[entryId - 1];
                 
                 return supertest(app)
-                .get(`/roses/${entryId}`)
+                .get(`/api/roses/${entryId}`)
                 .expect(200, expectedEntry)
             });
         });
@@ -95,7 +95,7 @@ describe('Roses Endpoints', function() {
 
             it ('Removes XSS attack content', () => {
                 return supertest(app)
-                    .get(`/roses/${maliciousEntry.id}`)
+                    .get(`/api/roses/${maliciousEntry.id}`)
                     .expect(200)
                     .expect(res => {
                         expect(res.body.rose).to.eql('Test rose entry BAD CODE &lt;script&gt;alert(\"xss\");&lt;/script&gt;')
@@ -107,7 +107,7 @@ describe('Roses Endpoints', function() {
         });
     });
 
-    describe(`POST /roses`, () => {
+    describe(`POST /api/roses`, () => {
         this.retries(3);
         
         const newRose = {
@@ -119,7 +119,7 @@ describe('Roses Endpoints', function() {
         
         it ('Creates a journal entry, responds 201 and with the entry created', () => {
             return supertest(app)
-                .post('/roses')
+                .post('/api/roses')
                 .send(newRose) 
                 .expect(201)
                 .expect(res => {
@@ -128,7 +128,7 @@ describe('Roses Endpoints', function() {
                     expect(res.body.bud).to.eql(newRose.bud)
                     expect(res.body.color).to.eql(newRose.color)
                     expect(res.body).to.have.property('id')
-                    expect(res.headers.location).to.eql(`/roses/${res.body.id}`)
+                    expect(res.headers.location).to.eql(`/api/roses/${res.body.id}`)
 
                     const expected = new Date().toLocaleString();
                     const actual = new Date(res.body.entry_date).toLocaleString();
@@ -137,7 +137,7 @@ describe('Roses Endpoints', function() {
                 })
                 .then(postRes => {
                     supertest(app)
-                        .get(`/roses/${postRes.body.id}`)
+                        .get(`/api/roses/${postRes.body.id}`)
                         .expect(postRes.body)
                 });
         });
@@ -156,7 +156,7 @@ describe('Roses Endpoints', function() {
                 delete newRose[field]
 
                 return supertest(app)
-                    .post('/roses')
+                    .post('/api/roses')
                     .send(newRose)
                     .expect(400, {
                         error: { message: `Missing '${field}' entry in request body.`}
@@ -166,13 +166,13 @@ describe('Roses Endpoints', function() {
 
     });
 
-    describe(`DELETE /roses/:rose_id`, () => {
+    describe(`DELETE /api/roses/:rose_id`, () => {
         context('Given there are no journal entries in the database', () => {
             it ('Responds with 404', () => {
                 const roseId = 12456;
 
                 return supertest(app)
-                    .delete(`/roses/${roseId}`)
+                    .delete(`/api/roses/${roseId}`)
                     .expect(404, { error: {message: `Journal entry does not exist.`}})
             });
         });
@@ -192,13 +192,96 @@ describe('Roses Endpoints', function() {
                 const expectedEntries = testRoses.filter(rose => rose.id !== idToRemove);
 
                 return supertest(app)
-                    .delete(`/roses/${idToRemove}`)
+                    .delete(`/api/roses/${idToRemove}`)
                     .expect(204)
                     .then(res => {
                         supertest(app)
                             .get('/roses')
                             .expect(expectedEntries)
                     });
+            });
+        });
+    });
+
+    describe(`PATCH /api/roses/:rose_id`, () => {
+        context('Given no journal entries', () => {
+            it ('Responds with 404', () => {
+                const entryId = 23567; 
+
+                return supertest(app)
+                    .patch(`/api/roses/${entryId}`)
+                    .expect(404, {
+                        error: {message: `Journal entry does not exist.`}
+                    })
+            });
+        });
+
+        context('Given there are journal entries in the database', () => {
+            const testRoses = makeRosesArray();
+
+            beforeEach('insert journal entries', () => {
+                return db
+                    .into('rose_entries')
+                    .insert(testRoses)
+            });
+            
+            it ('Responds with 204 and updates the journal entry', () => {
+                const idToUpdate = 2;
+
+                const updateEntry = {
+                    rose: 'Updated rose content',
+                    thorn: 'Updated thorn content',
+                    bud: 'Updated bud content'
+                }
+
+                const expectedEntry = {
+                    ...testRoses[idToUpdate - 1],
+                    ...updateEntry
+                };
+
+                return supertest(app)
+                    .patch(`/api/roses/${idToUpdate}`)
+                    .send(updateEntry)
+                    .expect(204)
+                    .then(res => {
+                        supertest(app)
+                            .get(`/api/roses/${idToUpdate}`)
+                            .expect(expectedEntry)
+                    })
+            });
+
+            it ('Responds with 400 when no required fields are sent', () => {
+                const idToUpdate = 2; 
+
+                return supertest(app)
+                    .patch(`/api/roses/${idToUpdate}`)
+                    .send({unrelatedField: 'bar'})
+                    .expect(400, {
+                        error: {
+                            message: `Request body must contain either 'rose', 'thorn', or 'bud'.`
+                        }
+                    })
+            });
+
+            it ('Responds with 204 when updating only a subset of fields', () => {
+                const idToUpdate = 2; 
+
+                const updateEntry = {
+                    rose: 'Updated Rose content'
+                }
+
+                return supertest(app)
+                    .patch(`/api/roses/${idToUpdate}`)
+                    .send({
+                        ...updateEntry,
+                        ignoreRoseColor: 'Red'
+                    })
+                    .expect(204)
+                    .then(res => {
+                        supertest(app)
+                            .get(`/api/roses/${idToUpdate}`)
+                            .expect(updateEntry)
+                    })
             });
         });
     });

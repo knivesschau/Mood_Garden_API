@@ -20,7 +20,7 @@ app.get('/', (req, res) => {
     res.send('Hello, world!')
 });
 
-app.use('/roses', rosesRouter);
+app.use('/api/roses', rosesRouter);
 
 app.use(function errorHandler(error, req, res, next) {
     let response;

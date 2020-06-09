@@ -25,6 +25,11 @@ const RosesService = {
             .where({id})
             .delete()
     },
+    updateRose(knex, id, newEntryFields) {
+        return knex('rose_entries')
+            .where({id})
+            .update(newEntryFields)
+    }
 
 }
 
