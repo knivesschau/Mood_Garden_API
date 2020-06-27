@@ -1,10 +1,11 @@
 const {expect} = require('chai');
 const knex = require('knex');
 const app = require('../src/app');
-const RosesService = require('../src/roses/roses-service');
 const {makeRosesArray} = require('./rose.fixtures');
+const {makeUsersArray} = require('./users.fixtures');
+const {makeAuthHeader} = require('./test-helpers');
 
-describe('Roses Endpoints', function() {
+describe.only('Roses Endpoints', function() {
     let db;
 
     before('make knex instance', () => {
@@ -17,22 +18,41 @@ describe('Roses Endpoints', function() {
 
     after('disconnect from db', () => db.destroy());
 
-    before('clean the table', () => db('rose_entries').truncate());
+    before('clean the first table', () => db('rose_entries').truncate());
 
-    afterEach('cleanup', () => db('rose_entries').truncate());
+    before('clean the second table', () => db('garden_users').delete());
 
-    
+    afterEach('cleanup first table', () => db('rose_entries').truncate());
+
+    afterEach('cleanup second table', () => db('garden_users').delete());
+
     describe(`GET /api/roses`, () => {
         context('Given no journal entries in the database', () => {
+            const testUsers = makeUsersArray();
+                    
+            beforeEach('insert test users', () => {
+                return db
+                .into('garden_users')
+                .insert(testUsers)
+            });
+            
             it ('Reponds with 200 and no journal entries', () => {
                 return supertest(app)
                     .get('/api/roses')
+                    .set('Authorization', makeAuthHeader(testUsers[0]))
                     .expect(200, [])
             });
         });
         
         context ('Given there are journal entries in the database', () => {
             const testRoses = makeRosesArray();
+            const testUsers = makeUsersArray();
+                    
+            beforeEach('insert test users', () => {
+                return db
+                .into('garden_users')
+                .insert(testUsers)
+            });
             
             beforeEach('insert journal entries', () => {
                 return db
@@ -40,40 +60,60 @@ describe('Roses Endpoints', function() {
                 .insert(testRoses)
             });
             
+            
             it ('GET /roses responds 200 and with all entries', () => {
                 return supertest(app)
                 .get('/api/roses')
+                .set('Authorization', makeAuthHeader(testUsers[0]))
                 .expect(200, testRoses)
             });
         });
     });
         
-    describe(`GET /api/roses/:rose_id`, () => {
+    describe (`GET /api/roses/:rose_id`, () => {
         context ('Given there are no journal entries in the database', () => {
+            const testUsers = makeUsersArray();
+                    
+            beforeEach('insert test users', () => {
+                return db
+                .into('garden_users')
+                .insert(testUsers)
+            });
+         
             it ('Responds with 404', () => {
                 const articleId = 2468; 
 
                 return supertest(app)
                     .get(`/api/roses/${articleId}`)
+                    .set('Authorization', makeAuthHeader(testUsers[0]))
                     .expect(404, {error: {message: `Journal entry does not exist.`}})
             });
         });
         
         context ('Given there are journal entries in the database', () => {
             const testRoses = makeRosesArray();
+            const testUsers = makeUsersArray();
+                    
+            beforeEach('insert test users', () => {
+                return db
+                .into('garden_users')
+                .insert(testUsers)
+            });
             
             beforeEach('insert journal entries', () => {
                 return db
                 .into('rose_entries')
                 .insert(testRoses)
             });
-            
-            it ('GET /roses/:rose_id responds with 200 and the specific entry', () => {
+
+
+            it.only ('GET /roses/:rose_id responds with 200 and the specific entry', () => { //specific entry AND author? hm 
                 const entryId = 2;
                 const expectedEntry = testRoses[entryId - 1];
                 
                 return supertest(app)
                 .get(`/api/roses/${entryId}`)
+                .set('Authorization', makeAuthHeader(testUsers[0]))
                 .expect(200, expectedEntry)
             });
         });
@@ -178,14 +218,7 @@ describe('Roses Endpoints', function() {
         });
         
         context('Given there are journal entries in the database', () => {
-            const testRoses = makeRosesArray();
-
-            beforeEach('insert journal entries', () => {
-                return db
-                    .into('rose_entries')
-                    .insert(testRoses)
-            });
-
+    
             it ('Responds with 204 and removes the journal entry', () => {
                 const idToRemove = 3; 
 
@@ -217,13 +250,6 @@ describe('Roses Endpoints', function() {
         });
 
         context('Given there are journal entries in the database', () => {
-            const testRoses = makeRosesArray();
-
-            beforeEach('insert journal entries', () => {
-                return db
-                    .into('rose_entries')
-                    .insert(testRoses)
-            });
             
             it ('Responds with 204 and updates the journal entry', () => {
                 const idToUpdate = 2;

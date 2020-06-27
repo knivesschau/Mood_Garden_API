@@ -6,7 +6,8 @@ function makeRosesArray() {
             rose: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
             thorn: 'Velit laoreet id donec ultrices tincidunt.',
             bud: 'Sed nisi lacus sed viverra tellus.',
-            color: 'Red'
+            color: 'Red',
+            author_id: 1
         },
         {
             id: 2,
@@ -14,7 +15,8 @@ function makeRosesArray() {
             rose: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
             thorn: 'Velit laoreet id donec ultrices tincidunt',
             bud: 'Sed nisi lacus sed viverra tellus.',
-            color: 'Pink'
+            color: 'Pink',
+            author_id: 2
         },
         {
             id: 3,
@@ -22,7 +24,8 @@ function makeRosesArray() {
             rose: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
             thorn: 'Velit laoreet id donec ultrices tincidunt',
             bud: 'Sed nisi lacus sed viverra tellus.',
-            color: 'Yellow'
+            color: 'Yellow',
+            author_id: 3
         }
     ];
 }

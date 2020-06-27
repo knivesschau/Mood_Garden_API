@@ -2,6 +2,7 @@ const path = require('path');
 const express = require('express');
 const xss = require('xss');
 const RosesService = require('./roses-service');
+const {requireAuth} = require('../middleware/basic-auth');
 
 const rosesRouter = express.Router();
 const jsonParser = express.json();
@@ -17,7 +18,8 @@ const serializeJournalEntry = rose => ({
 
 rosesRouter 
     .route('/')
-    .get( (req,res, next) => {
+    .all(requireAuth)
+    .get((req,res, next) => {
         RosesService.getAllRoses(
             req.app.get('db')
         )
@@ -26,7 +28,7 @@ rosesRouter
         })
         .catch(next)
     })
-    .post(jsonParser, (req, res, next) => {
+    .post(requireAuth, jsonParser, (req, res, next) => {
         const {rose, thorn, bud, color} = req.body;
         const newRose = {rose, thorn, bud, color};
 
@@ -53,6 +55,7 @@ rosesRouter
 
 rosesRouter
     .route('/:rose_id')
+    .all(requireAuth)
     .all((req, res, next) => {
         RosesService.getRoseById(
             req.app.get('db'),
