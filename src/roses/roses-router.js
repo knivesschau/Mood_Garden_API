@@ -13,7 +13,8 @@ const serializeJournalEntry = rose => ({
     rose: xss(rose.rose),
     thorn: xss(rose.thorn),
     bud: xss(rose.bud),
-    color: xss(rose.color)
+    color: xss(rose.color),
+    author_id: rose.author_id
 });
 
 rosesRouter 
@@ -39,6 +40,8 @@ rosesRouter
                 })
             }
         }
+
+        // newRose.user_id = req.user.id;
 
         RosesService.insertRose(
             req.app.get('db'),

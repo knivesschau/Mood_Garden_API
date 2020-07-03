@@ -5,7 +5,7 @@ const {makeRosesArray} = require('./rose.fixtures');
 const {makeUsersArray} = require('./users.fixtures');
 const {makeAuthHeader} = require('./test-helpers');
 
-describe.only('Roses Endpoints', function() {
+describe('Roses Endpoints', function() {
     let db;
 
     before('make knex instance', () => {
@@ -34,15 +34,15 @@ describe.only('Roses Endpoints', function() {
                 return db
                 .into('garden_users')
                 .insert(testUsers)
-            });
+            })
             
             it ('Reponds with 200 and no journal entries', () => {
                 return supertest(app)
                     .get('/api/roses')
                     .set('Authorization', makeAuthHeader(testUsers[0]))
                     .expect(200, [])
-            });
-        });
+            })
+        })
         
         context ('Given there are journal entries in the database', () => {
             const testRoses = makeRosesArray();
@@ -67,8 +67,8 @@ describe.only('Roses Endpoints', function() {
                 .set('Authorization', makeAuthHeader(testUsers[0]))
                 .expect(200, testRoses)
             });
-        });
-    });
+        })
+    })
         
     describe (`GET /api/roses/:rose_id`, () => {
         context ('Given there are no journal entries in the database', () => {
@@ -78,7 +78,7 @@ describe.only('Roses Endpoints', function() {
                 return db
                 .into('garden_users')
                 .insert(testUsers)
-            });
+            })
          
             it ('Responds with 404', () => {
                 const articleId = 2468; 
@@ -87,8 +87,8 @@ describe.only('Roses Endpoints', function() {
                     .get(`/api/roses/${articleId}`)
                     .set('Authorization', makeAuthHeader(testUsers[0]))
                     .expect(404, {error: {message: `Journal entry does not exist.`}})
-            });
-        });
+            })
+        })
         
         context ('Given there are journal entries in the database', () => {
             const testRoses = makeRosesArray();
@@ -98,22 +98,22 @@ describe.only('Roses Endpoints', function() {
                 return db
                 .into('garden_users')
                 .insert(testUsers)
-            });
+            })
             
             beforeEach('insert journal entries', () => {
                 return db
                 .into('rose_entries')
                 .insert(testRoses)
-            });
+            })
 
 
-            it.only ('GET /roses/:rose_id responds with 200 and the specific entry', () => { //specific entry AND author? hm 
+            it ('GET /roses/:rose_id responds with 200', () => {
                 const entryId = 2;
                 const expectedEntry = testRoses[entryId - 1];
-                
+
                 return supertest(app)
                 .get(`/api/roses/${entryId}`)
-                .set('Authorization', makeAuthHeader(testUsers[0]))
+                .set('Authorization', makeAuthHeader(testUsers[1]))
                 .expect(200, expectedEntry)
             });
         });
@@ -124,9 +124,18 @@ describe.only('Roses Endpoints', function() {
                 rose: 'Test rose entry BAD CODE <script>alert("xss");</script>',
                 bud: 'Test bud entry BAD CODE <script>alert("xss");</script>',
                 thorn: `Test thorn entry BAD IMG "https://url.to.file.which/does-not.exist" onerror="alert(document.cookie);"&gt`,
-                color: "Pink"
+                color: "Pink",
+                author_id: 1
             };
 
+            const testUsers = makeUsersArray();
+                    
+            beforeEach('insert test users', () => {
+                return db
+                .into('garden_users')
+                .insert(testUsers)
+            })
+            
             beforeEach('insert xss journal entry', () => {
                 return db
                     .into('rose_entries')
@@ -136,6 +145,7 @@ describe.only('Roses Endpoints', function() {
             it ('Removes XSS attack content', () => {
                 return supertest(app)
                     .get(`/api/roses/${maliciousEntry.id}`)
+                    .set('Authorization', makeAuthHeader(testUsers[0]))
                     .expect(200)
                     .expect(res => {
                         expect(res.body.rose).to.eql('Test rose entry BAD CODE &lt;script&gt;alert(\"xss\");&lt;/script&gt;')
@@ -149,18 +159,27 @@ describe.only('Roses Endpoints', function() {
 
     describe(`POST /api/roses`, () => {
         this.retries(3);
+
+        const testUsers = makeUsersArray();
+                    
+        beforeEach('insert test users', () => {
+            return db
+            .into('garden_users')
+            .insert(testUsers)
+        })
         
         const newRose = {
             rose: 'Test rose entry',
             thorn: 'Test thorn entry',
             bud: 'Test bud entry',
-            color: 'Purple'
+            color: 'Purple',
         };
         
-        it ('Creates a journal entry, responds 201 and with the entry created', () => {
+        it.only('Creates a journal entry, responds 201 and with the entry created', () => {
             return supertest(app)
                 .post('/api/roses')
-                .send(newRose) 
+                .send(newRose)
+                .set('Authorization', makeAuthHeader(testUsers[0])) 
                 .expect(201)
                 .expect(res => {
                     expect(res.body.rose).to.eql(newRose.rose)
@@ -168,6 +187,7 @@ describe.only('Roses Endpoints', function() {
                     expect(res.body.bud).to.eql(newRose.bud)
                     expect(res.body.color).to.eql(newRose.color)
                     expect(res.body).to.have.property('id')
+                    expect(res.user_id).to.eql(testUsers.id)
                     expect(res.headers.location).to.eql(`/api/roses/${res.body.id}`)
 
                     const expected = new Date().toLocaleString();
