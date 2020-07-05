@@ -41,7 +41,7 @@ rosesRouter
             }
         }
 
-        // newRose.user_id = req.user.id;
+        newRose.author_id = req.user.id;
 
         RosesService.insertRose(
             req.app.get('db'),

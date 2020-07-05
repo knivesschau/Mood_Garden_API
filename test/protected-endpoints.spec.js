@@ -1,12 +1,11 @@
-const {expect} = require('chai');
 const knex = require('knex');
 const app = require('../src/app');
 const {makeRosesArray} = require('./rose.fixtures');
 const {makeUsersArray} = require('./users.fixtures');
-const {makeAuthHeader} = require('./test-helpers');
+const helpers = require('./test-helpers');
 const supertest = require('supertest');
 
-describe('Protected Endpoints', function() {
+describe ('Protected Endpoints', function() {
     let db; 
 
     const testRoses = makeRosesArray();
@@ -22,20 +21,20 @@ describe('Protected Endpoints', function() {
 
     after('disconnect from db', () => db.destroy());
 
-    before('clean the first table', () => db('rose_entries').truncate());
-
     before('clean the second table', () => db('garden_users').delete());
 
-    afterEach('cleanup first table', () => db('rose_entries').truncate());
+    before('clean the first table', () => db('rose_entries').truncate());
 
     afterEach('cleanup second table', () => db('garden_users').delete());
+
+    afterEach('cleanup first table', () => db('rose_entries').truncate());
 
     beforeEach('insert test users', () => {
         return db
         .into('garden_users')
         .insert(testUsers)
     });
-    
+
     beforeEach('insert journal entries', () => {
         return db
         .into('rose_entries')
@@ -70,7 +69,7 @@ describe('Protected Endpoints', function() {
             it ('Responds 401 `Unauthorized request` when no credentials in token', () => {
                 const unauthCreds = {user_name: '', password: ''}
                 return endpoint.method(endpoint.path)
-                    .set('Authorization', makeAuthHeader(unauthCreds))
+                    .set('Authorization', helpers.makeAuthHeader(unauthCreds))
                     .expect(401, {error: `Unauthorized request`})
             })
 
@@ -78,7 +77,7 @@ describe('Protected Endpoints', function() {
                 const userInvalidName = {user_name: 'fake-user', password: 'fake101'}
                 return supertest(app)
                     .get(`/api/roses/1`)
-                    .set('Authorization', makeAuthHeader(userInvalidName))
+                    .set('Authorization', helpers.makeAuthHeader(userInvalidName))
                     .expect(401, {error: `Unauthorized request`})
             })
 
@@ -86,7 +85,7 @@ describe('Protected Endpoints', function() {
                 const userInvalidPass = {user_name: testUsers[0], password: 'incorrectpass'}
                 return supertest(app)
                     .get(`/api/roses/1`)
-                    .set('Authorization', makeAuthHeader(userInvalidPass))
+                    .set('Authorization', helpers.makeAuthHeader(userInvalidPass))
                     .expect(401, {error: `Unauthorized request`})
             })
         })
