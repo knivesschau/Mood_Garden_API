@@ -60,32 +60,26 @@ describe ('Protected Endpoints', function() {
     ];
 
     protectedEndpoints.forEach(endpoint => {
-        describe(endpoint.name, () => {
-            it ('Responds 401 `Missing basic token` when no basic token', () => {
+        describe (endpoint.name, () => {
+            it ('Responds 401 `Missing bearer token` when no bearer token', () => {
                 return endpoint.method(endpoint.path)
-                    .expect(401, {error: `Missing basic token`})
+                    .expect(401, {error: `Missing bearer token`})
             })
 
-            it ('Responds 401 `Unauthorized request` when no credentials in token', () => {
-                const unauthCreds = {user_name: '', password: ''}
+            it ('Responds 401 `Unauthorized request` when invalid JWT secret', () => {
+                const validUser = testUsers[0];
+                const invalidSecret = 'bad-secret';
+
                 return endpoint.method(endpoint.path)
-                    .set('Authorization', helpers.makeAuthHeader(unauthCreds))
+                    .set('Authorization', helpers.makeAuthHeader(validUser, invalidSecret))
                     .expect(401, {error: `Unauthorized request`})
             })
 
-            it ('Responds with 401 `Unauthorized request` when invalid user is provided', () => {
-                const userInvalidName = {user_name: 'fake-user', password: 'fake101'}
-                return supertest(app)
-                    .get(`/api/roses/1`)
-                    .set('Authorization', helpers.makeAuthHeader(userInvalidName))
-                    .expect(401, {error: `Unauthorized request`})
-            })
+            it ('Responds with 401 `Unauthorized request` when invalid sub in payload', () => {
+                const invalidUser = {user_name: 'fake-user', id: 1}
 
-            it ('Responds with 401 `Unauthorized request` when invalid password is provided', () => {
-                const userInvalidPass = {user_name: testUsers[0], password: 'incorrectpass'}
-                return supertest(app)
-                    .get(`/api/roses/1`)
-                    .set('Authorization', helpers.makeAuthHeader(userInvalidPass))
+                return endpoint.method(endpoint.path)
+                    .set('Authorization', helpers.makeAuthHeader(invalidUser))
                     .expect(401, {error: `Unauthorized request`})
             })
         })

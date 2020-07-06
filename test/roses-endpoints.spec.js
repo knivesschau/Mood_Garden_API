@@ -75,7 +75,7 @@ describe ('Roses Endpoints', function() {
                 helpers.seedUsers(db, testUsers)
             })
 
-            beforeEach('insert journal entries', () => {
+            beforeEach('insert journal db', () => {
                 return db
                 .into('rose_entries')
             })
@@ -162,7 +162,7 @@ describe ('Roses Endpoints', function() {
             helpers.seedUsers(db, testUsers)
         })
 
-        beforeEach('insert journal entries', () => {
+        beforeEach('insert journal db', () => {
             return db
             .into('rose_entries')
         })
@@ -235,7 +235,7 @@ describe ('Roses Endpoints', function() {
                 helpers.seedUsers(db, testUsers)
             })
 
-            beforeEach('insert journal entries', () => {
+            beforeEach('insert journal db', () => {
                 return db
                 .into('rose_entries')
             })
@@ -291,7 +291,7 @@ describe ('Roses Endpoints', function() {
                 helpers.seedUsers(db, testUsers)
             })
 
-            beforeEach('insert journal entries', () => {
+            beforeEach('insert journal db', () => {
                 return db
                 .into('rose_entries')
             })
