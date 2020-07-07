@@ -189,10 +189,10 @@ describe ('Roses Endpoints', function() {
                     expect(res.author_id).to.eql(testUsers.id)
                     expect(res.headers.location).to.eql(`/api/roses/${res.body.id}`)
 
-                    const expected = new Date().toLocaleString();
-                    const actual = new Date(res.body.entry_date).toLocaleString();
+                    const expectedDate = new Date().toLocaleString();
+                    const actualDate = new Date(res.body.entry_date).toLocaleString();
 
-                    expect(actual).to.eql(expected)
+                    expect(actualDate).to.eql(expectedDate)
                 })
                 .then(postRes => {
                     supertest(app)
