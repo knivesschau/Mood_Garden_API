@@ -10,8 +10,11 @@ function makeAuthHeader(user, secret = process.env.JWT_SECRET) {
             algorithm: 'HS256', 
         }
     )
+    
+    console.log(token);
 
     return `Bearer ${token}`
+
 }
 
 function seedUsers(db, users) {
