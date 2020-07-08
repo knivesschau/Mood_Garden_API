@@ -19,7 +19,7 @@ const serializeJournalEntry = rose => ({
 
 rosesRouter 
     .route('/')
-    // .all(requireAuth)
+    .all(requireAuth)
     .get((req,res, next) => {
         RosesService.getAllRoses(
             req.app.get('db')
@@ -29,7 +29,8 @@ rosesRouter
         })
         .catch(next)
     })
-    .post(jsonParser, (req, res, next) => {
+    // remember to put requireAuth back on line 33! 
+    .post(requireAuth, jsonParser, (req, res, next) => {
         const {rose, thorn, bud, color} = req.body;
         const newRose = {rose, thorn, bud, color};
 
@@ -58,7 +59,7 @@ rosesRouter
 
 rosesRouter
     .route('/:rose_id')
-    // .all(requireAuth)
+    .all(requireAuth)
     // if user_id === user_id (passed in/author_id), then get rose by id (go to the roses service)
     // else if no match, throw error 401 unauth/403 forbidden
     .all((req, res, next) => {
