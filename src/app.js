@@ -22,8 +22,8 @@ app.get('/', (req, res) => {
     res.send('Welcome to the Mood Garden API!')
 });
 
-app.use('/api/roses', rosesRouter);
 app.use('/api/auth', authRouter);
+app.use('/api/roses', rosesRouter); 
 app.use('/api/users', usersRouter);
 
 app.use(function errorHandler(error, req, res, next) {
