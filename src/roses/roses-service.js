@@ -1,7 +1,15 @@
+const config = '../config';
+const jwt = require('jsonwebtoken');
+const AuthService = require('../auth/auth-service');
+
 const RosesService = {
-    getAllRoses(knex)
+    getAllRoses(knex, author_id)
     {
-        return knex.select('*').from('rose_entries')
+        console.log('string test 1', author_id)
+        return knex
+            .select('*')
+            .from('rose_entries')
+            .where({author_id: id}) 
     },
     getRoseById(knex, id) 
     {

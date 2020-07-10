@@ -2,6 +2,7 @@ const path = require('path');
 const express = require('express');
 const xss = require('xss');
 const RosesService = require('./roses-service');
+const AuthService = require('../auth/auth-service');
 const {requireAuth} = require('../middleware/jwt-auth');
 
 const rosesRouter = express.Router();
@@ -22,14 +23,15 @@ rosesRouter
     .all(requireAuth)
     .get((req,res, next) => {
         RosesService.getAllRoses(
-            req.app.get('db')
+            req.app.get('db'),
+            req.params.author_id
         )
         .then(roses => {
+            console.log('string test 2', author_id)
             res.json(roses)
         })
         .catch(next)
     })
-    // remember to put requireAuth back on line 33! 
     .post(requireAuth, jsonParser, (req, res, next) => {
         const {rose, thorn, bud, color} = req.body;
         const newRose = {rose, thorn, bud, color};
