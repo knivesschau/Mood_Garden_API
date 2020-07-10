@@ -24,7 +24,7 @@ rosesRouter
     .get((req,res, next) => {
         RosesService.getAllRoses(
             req.app.get('db'),
-            req.params.author_id
+            req.user.id,
         )
         .then(roses => {
             console.log('string test 2', author_id)

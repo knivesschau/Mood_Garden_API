@@ -9,7 +9,7 @@ const RosesService = {
         return knex
             .select('*')
             .from('rose_entries')
-            .where({author_id: id}) 
+            .where({author_id: author_id}) 
     },
     getRoseById(knex, id) 
     {
