@@ -2,7 +2,6 @@ const path = require('path');
 const express = require('express');
 const xss = require('xss');
 const RosesService = require('./roses-service');
-const AuthService = require('../auth/auth-service');
 const {requireAuth} = require('../middleware/jwt-auth');
 
 const rosesRouter = express.Router();
@@ -24,10 +23,9 @@ rosesRouter
     .get((req,res, next) => {
         RosesService.getAllRoses(
             req.app.get('db'),
-            req.user.id,
+            req.user.id
         )
-        .then(roses => {
-            console.log('string test 2', author_id)
+        .then(roses => { 
             res.json(roses)
         })
         .catch(next)
@@ -62,12 +60,11 @@ rosesRouter
 rosesRouter
     .route('/:rose_id')
     .all(requireAuth)
-    // if user_id === user_id (passed in/author_id), then get rose by id (go to the roses service)
-    // else if no match, throw error 401 unauth/403 forbidden
     .all((req, res, next) => {
         RosesService.getRoseById(
             req.app.get('db'),
-            req.params.rose_id
+            req.params.rose_id,
+            req.user.id,
         )
             .then(rose => {
                 if (!rose) {
@@ -75,6 +72,16 @@ rosesRouter
                         error: {message: `Journal entry does not exist.`}
                     });
                 }
+
+                const user_id = req.user.id; 
+                const author_id = rose.author_id;
+
+                if (author_id !== user_id) {
+                    return res.status(403).json({
+                        error: {message: `Credentials invalid.`}
+                    })
+                }
+
                 res.rose = rose;
                 next()
             })
