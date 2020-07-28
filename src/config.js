@@ -4,5 +4,5 @@ module.exports = {
     DATABASE_URL: process.env.DATABASE_URL || 'postgresql://catrinafuentes@localhost/mood-garden',
     TEST_DATABASE_URL: process.env.TEST_DATABASE_URL || 'postgresql://catrinafuentes@localhost/mood-garden-test',
     JWT_SECRET: process.env.JWT_SECRET || 'change-this-secret',
-    JWT_EXPIRY: process.env.JWT_EXPIRY || '3m'
+    JWT_EXPIRY: process.env.JWT_EXPIRY || '90m'
   }

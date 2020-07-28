@@ -58,11 +58,11 @@ describe ('Roses Endpoints', function() {
             });
             
             
-            it ('GET /roses responds 200 and with all entries', () => {
+            it ('GET /roses responds 200 and with specific entries written by user logged in', () => {
                 return supertest(app)
                 .get('/api/roses')
                 .set('Authorization', helpers.makeAuthHeader(testUsers[0]))
-                .expect(200, testRoses)
+                .expect(200, testRoses[0])
             });
         })
     })
