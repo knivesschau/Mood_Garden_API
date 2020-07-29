@@ -46,6 +46,7 @@ describe ('Roses Endpoints', function() {
         context ('Given there are journal entries in the database', () => {
             const testRoses = makeRosesArray();
             const testUsers = makeUsersArray();
+            const validUser = testUsers[0];
                     
             beforeEach('insert test users', () => {
                 helpers.seedUsers(db, testUsers)
@@ -56,13 +57,14 @@ describe ('Roses Endpoints', function() {
                 .into('rose_entries')
                 .insert(testRoses)
             });
+
+            const expectedEntries = testRoses.filter(rose => rose.author_id === validUser.id);
             
-            
-            it ('GET /roses responds 200 and with specific entries written by user logged in', () => {
+            it ('GET /roses responds 200 and with all entries written by user logged in', () => {
                 return supertest(app)
                 .get('/api/roses')
                 .set('Authorization', helpers.makeAuthHeader(testUsers[0]))
-                .expect(200, testRoses[0])
+                .expect(200, expectedEntries)
             });
         })
     })
@@ -111,7 +113,7 @@ describe ('Roses Endpoints', function() {
 
                 return supertest(app)
                 .get(`/api/roses/${entryId}`)
-                .set('Authorization', helpers.makeAuthHeader(testUsers[1]))
+                .set('Authorization', helpers.makeAuthHeader(testUsers[0]))
                 .expect(200, expectedEntry)
             });
         });
@@ -265,7 +267,7 @@ describe ('Roses Endpoints', function() {
             })
 
             it ('Responds with 204 and removes the journal entry', () => {
-                const idToRemove = 3; 
+                const idToRemove = 1; 
 
                 const expectedEntries = testRoses.filter(rose => rose.id !== idToRemove);
 
@@ -323,7 +325,7 @@ describe ('Roses Endpoints', function() {
             })
 
             it ('Responds with 204 and updates the journal entry', () => {
-                const idToUpdate = 2;
+                const idToUpdate = 1;
 
                 const updateEntry = {
                     rose: 'Updated rose content',
