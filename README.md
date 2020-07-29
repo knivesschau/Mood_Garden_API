@@ -16,15 +16,15 @@ This is the API Server for the Mood Garden App. Mood Garden is an app that allow
 - Mocha
 - Supertest
 
-## Endpoints
+## API Endpoints
 ```
 GET
-  - /api/roses 
-  - /api/:rose_id
+  - /api/roses (All Entries by User Logged In)
+  - /api/:rose_id 
 ```
 ```
 POST, DELETE, AND PATCH
-  - /api/rose_id
+  - /api/:rose_id 
 ```
 ```
 USERS AND AUTHENTICATION
