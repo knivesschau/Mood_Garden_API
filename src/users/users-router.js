@@ -6,20 +6,21 @@ const { hashSync } = require('bcryptjs');
 const usersRouter = express.Router();
 const jsonBodyParser = express.json();
 
+// router to handle new user registrations on the server. //
 usersRouter
     .post('/', jsonBodyParser, (req, res, next) => {
         const {password, user_name} = req.body;
 
         for (const field of ['user_name', 'password']) {
             if (!req.body[field]) {
-                return res.status(400).json({error: `Missing '${field}' in request body.`})
+                return res.status(400).json({error: `Missing '${field}' in request body.`});
             }
         }
 
         const passwordChecker = UsersService.validatePassword(password);
 
         if (passwordChecker) {
-            return res.status(400).json({error: passwordChecker})
+            return res.status(400).json({error: passwordChecker});
         }
 
         UsersService.hasDuplicateUser(
@@ -28,7 +29,7 @@ usersRouter
         )
             .then(hasDuplicateUser => {
                 if (hasDuplicateUser) {
-                    return res.status(400).json({error: `Username already taken.`})
+                    return res.status(400).json({error: `Username already taken.`});
                 }
                 
                 return UsersService.hashPassword(password)
@@ -38,7 +39,7 @@ usersRouter
                             user_name,
                             password: hashedPassword,
                             date_created: 'now()'
-                        }
+                        };
 
                         return UsersService.insertNewUser(
                             req.app.get('db'),
@@ -48,11 +49,11 @@ usersRouter
                             res
                                 .status(201)
                                 .location(path.posix.join(req.originalUrl, `/${user.id}`))
-                                .json(UsersService.serializeUser(user))
+                                .json(UsersService.serializeUser(user));
                         })
-                    })
+                    });
             })
-            .catch(next)
-    })
+            .catch(next);
+    });
 
 module.exports = usersRouter;

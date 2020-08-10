@@ -1,10 +1,11 @@
+// service object to handle database queries to GET, POST, PATCH, or DELETE journal entries. //
 const RosesService = {
     getAllRoses(knex, author_id)
     {
         return knex
             .select('*')
             .from('rose_entries')
-            .where({author_id: author_id}) 
+            .where({author_id: author_id});
     },
     getRoseById(knex, id, author_id) 
     {
@@ -29,14 +30,13 @@ const RosesService = {
     deleteRose(knex, id) {
         return knex('rose_entries')
             .where({id})
-            .delete()
+            .delete();
     },
     updateRose(knex, id, newEntryFields) {
         return knex('rose_entries')
             .where({id})
-            .update(newEntryFields)
+            .update(newEntryFields);
     }
-
-}
+};
 
 module.exports = RosesService;

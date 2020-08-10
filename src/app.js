@@ -18,10 +18,12 @@ app.use(morgan(morganOption));
 app.use(helmet());
 app.use(cors());
 
+// landing page of server. //
 app.get('/', (req, res) => {
-    res.send('Welcome to the Mood Garden API!')
+    res.send('Welcome to the Mood Garden API!');
 });
 
+// hook up all endpoints and routers on server. //
 app.use('/api/auth', authRouter);
 app.use('/api/roses', rosesRouter); 
 app.use('/api/users', usersRouter);

@@ -7,6 +7,7 @@ const {requireAuth} = require('../middleware/jwt-auth');
 const rosesRouter = express.Router();
 const jsonParser = express.json();
 
+// pass all journal entries through xss sanitizer. //
 const serializeJournalEntry = rose => ({
     id: rose.id,
     entry_date: rose.entry_date,
@@ -17,6 +18,7 @@ const serializeJournalEntry = rose => ({
     author_id: rose.author_id
 });
 
+// routers for all journal entries on the server. //
 rosesRouter 
     .route('/')
     .all(requireAuth)
@@ -26,9 +28,9 @@ rosesRouter
             req.user.id
         )
         .then(roses => { 
-            res.json(roses)
+            res.json(roses);
         })
-        .catch(next)
+        .catch(next);
     })
     .post(requireAuth, jsonParser, (req, res, next) => {
         const {rose, thorn, bud, color} = req.body;
@@ -38,7 +40,7 @@ rosesRouter
             if (value == null) {
                 return res.status(400).json({
                     error: { message: `Missing '${key}' entry in request body.`}
-                })
+                });
             }
         }
 
@@ -52,9 +54,9 @@ rosesRouter
             res
                 .status(201)
                 .location(path.posix.join(req.originalUrl, `/${rose.id}`))
-                .json(rose)
+                .json(rose);
         })
-        .catch(next)
+        .catch(next);
     });
 
 rosesRouter
@@ -79,16 +81,16 @@ rosesRouter
                 if (author_id !== user_id) {
                     return res.status(403).json({
                         error: {message: `Credentials invalid.`}
-                    })
+                    });
                 }
 
                 res.rose = rose;
-                next()
+                next();
             })
-            .catch(next)
+            .catch(next);
     })
     .get((req, res, next) => {
-       res.json(serializeJournalEntry(res.rose))
+       res.json(serializeJournalEntry(res.rose));
     })
     .delete((req, res, next) => {
         RosesService.deleteRose(
@@ -96,9 +98,9 @@ rosesRouter
             req.params.rose_id
         )
             .then(() => {
-                res.status(204).end()
+                res.status(204).end();
             })
-            .catch(next)
+            .catch(next);
     })
     .patch(jsonParser, (req, res, next) => {
         const {rose, thorn, bud} = req.body;
@@ -120,9 +122,9 @@ rosesRouter
             entryToUpdate
         )
             .then(numRowsAffected => {
-                res.status(204).end()
+                res.status(204).end();
             })
-            .catch(next)
+            .catch(next);
     });
 
 module.exports = rosesRouter;
